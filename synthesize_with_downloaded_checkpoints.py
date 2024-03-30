@@ -42,14 +42,14 @@ else:
         "Хашлага даван, зүлэг гэмтээсэн жолоочийн эрхийг хоёр жилээр хасжээ.",
         "Монгол хүн бидний сэтгэлийг сорсон орон. Энэ бол миний төрсөн нутаг. Монголын сайхан орон.",
         "Постройка крейсера затягивалась из-за проектных неувязок, необходимости."
-    
+
     ]
 
 torch.set_grad_enabled(False)
 
 text2mel = Text2Mel(vocab)
 last_checkpoint_file_name = get_last_checkpoint_file_name(os.path.join(hp.logdir, '%s-text2mel' % args.dataset))
-last_checkpoint_file_name = 'logdir/%s-text2mel/step-200K.pth' % args.dataset
+last_checkpoint_file_name = 'logdir/%s-text2mel-step-200K.pth' % args.dataset
 if last_checkpoint_file_name:
     print("loading text2mel checkpoint '%s'..." % last_checkpoint_file_name)
     text2mel.load_state_dict(torch.load(last_checkpoint_file_name).state_dict())
@@ -60,7 +60,7 @@ else:
 
 ssrn = SSRN()
 last_checkpoint_file_name = get_last_checkpoint_file_name(os.path.join(hp.logdir, '%s-ssrn' % args.dataset))
-last_checkpoint_file_name = 'logdir/%s-ssrn/step-165K.pth' % args.dataset
+last_checkpoint_file_name = 'logdir/%s-ssrn-step-165K.pth' % args.dataset
 if last_checkpoint_file_name:
     print("loading ssrn checkpoint '%s'..." % last_checkpoint_file_name)
     ssrn.load_state_dict(torch.load(last_checkpoint_file_name).state_dict())

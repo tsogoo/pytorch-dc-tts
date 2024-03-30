@@ -34,9 +34,9 @@ if use_gpu:
     torch.backends.cudnn.benchmark = True
 
 train_data_loader = Text2MelDataLoader(text2mel_dataset=SpeechDataset(['texts', 'mels', 'mel_gates']), batch_size=32,
-                                       mode='train')
+                                       mode='train', num_workers=0)
 valid_data_loader = Text2MelDataLoader(text2mel_dataset=SpeechDataset(['texts', 'mels', 'mel_gates']), batch_size=32,
-                                       mode='valid')
+                                       mode='valid', num_workers=0)
 
 text2mel = Text2Mel(vocab).cuda()
 

@@ -68,9 +68,9 @@ elif args.dataset == 'mbspeech':
             # else:
             #     print("'%s' already exists" % bible_book_file_name)
 
-            # print("extracting '%s'..." % bible_book_file_name)
-            # zipfile = ZipFile(bible_book_file_path)
-            # zipfile.extractall(datasets_path)
+            print("extracting '%s'..." % bible_book_file_name)
+            zipfile = ZipFile(bible_book_file_path)
+            zipfile.extractall(datasets_path)
 
     dataset_csv_file_path = os.path.join(datasets_path, '%s-csv.zip' % dataset_name)
     dataset_csv_extracted_path = os.path.join(datasets_path, '%s-csv' % dataset_name)
@@ -81,8 +81,8 @@ elif args.dataset == 'mbspeech':
     #     print("'%s' already exists" % dataset_csv_file_path)
 
     print("extracting '%s'..." % dataset_csv_file_path)
-    # zipfile = ZipFile(dataset_csv_file_path)
-    # zipfile.extractall(datasets_path)
+    zipfile = ZipFile(dataset_csv_file_path)
+    zipfile.extractall(datasets_path)
 
     sample_rate = 44100  # original sample rate
     total_duration_s = 0
