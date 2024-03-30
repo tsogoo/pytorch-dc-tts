@@ -1,3 +1,12 @@
 LJSpeech-1.1/
 MBSpeech-1.0/
 *.tar.gz
+*.zip
+MBSpeech-1.0-csv/
+01_Genesis/
+02_Exodus/
+03_Leviticus/
+01_Genesis.zip
+02_Exodus.zip
+03_Leviticus.zip
+MBSpeech-1.0-csv.zip

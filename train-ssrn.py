@@ -31,8 +31,8 @@ print('use_gpu', use_gpu)
 if use_gpu:
     torch.backends.cudnn.benchmark = True
 
-train_data_loader = SSRNDataLoader(ssrn_dataset=SpeechDataset(['mags', 'mels']), batch_size=24, mode='train')
-valid_data_loader = SSRNDataLoader(ssrn_dataset=SpeechDataset(['mags', 'mels']), batch_size=24, mode='valid')
+train_data_loader = SSRNDataLoader(ssrn_dataset=SpeechDataset(['mags', 'mels']), batch_size=24, mode='train', num_workers=0)
+valid_data_loader = SSRNDataLoader(ssrn_dataset=SpeechDataset(['mags', 'mels']), batch_size=24, mode='valid', num_workers=0)
 
 ssrn = SSRN().cuda()
 

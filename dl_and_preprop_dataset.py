@@ -13,6 +13,7 @@ import argparse
 import fnmatch
 import librosa
 import pandas as pd
+import soundfile as sf
 
 from hparams import HParams as hp
 from zipfile import ZipFile
@@ -61,27 +62,27 @@ elif args.dataset == 'mbspeech':
         for bible_book_name in bible_books:
             bible_book_file_name = '%s.zip' % bible_book_name
             bible_book_file_path = os.path.join(datasets_path, bible_book_file_name)
-            if not os.path.isfile(bible_book_file_path):
-                url = "https://s3.us-east-2.amazonaws.com/bible.davarpartners.com/Mongolian/" + bible_book_file_name
-                download_file(url, bible_book_file_path)
-            else:
-                print("'%s' already exists" % bible_book_file_name)
+            # if not os.path.isfile(bible_book_file_path):
+            #     url = "https://s3.us-east-2.amazonaws.com/bible.davarpartners.com/Mongolian/" + bible_book_file_name
+            #     download_file(url, bible_book_file_path)
+            # else:
+            #     print("'%s' already exists" % bible_book_file_name)
 
-            print("extracting '%s'..." % bible_book_file_name)
-            zipfile = ZipFile(bible_book_file_path)
-            zipfile.extractall(datasets_path)
+            # print("extracting '%s'..." % bible_book_file_name)
+            # zipfile = ZipFile(bible_book_file_path)
+            # zipfile.extractall(datasets_path)
 
     dataset_csv_file_path = os.path.join(datasets_path, '%s-csv.zip' % dataset_name)
     dataset_csv_extracted_path = os.path.join(datasets_path, '%s-csv' % dataset_name)
-    if not os.path.isfile(dataset_csv_file_path):
-        url = "https://www.dropbox.com/s/dafueq0w278lbz6/%s-csv.zip?dl=1" % dataset_name
-        download_file(url, dataset_csv_file_path)
-    else:
-        print("'%s' already exists" % dataset_csv_file_path)
+    # if not os.path.isfile(dataset_csv_file_path):
+    #     url = "https://www.dropbox.com/s/dafueq0w278lbz6/%s-csv.zip?dl=1" % dataset_name
+    #     download_file(url, dataset_csv_file_path)
+    # else:
+    #     print("'%s' already exists" % dataset_csv_file_path)
 
     print("extracting '%s'..." % dataset_csv_file_path)
-    zipfile = ZipFile(dataset_csv_file_path)
-    zipfile.extractall(datasets_path)
+    # zipfile = ZipFile(dataset_csv_file_path)
+    # zipfile.extractall(datasets_path)
 
     sample_rate = 44100  # original sample rate
     total_duration_s = 0
@@ -108,7 +109,7 @@ elif args.dataset == 'mbspeech':
         book_download_path = os.path.join(datasets_path, book_name)
         wildcard = "*%02d - DPI.mp3" % chapter
         for file_name in os.listdir(book_download_path):
-            if fnmatch.fnmatch(file_name, wildcard):
+            if int(file_name.split("-")[0]) == int(chapter):
                 return os.path.join(book_download_path, file_name)
         return None
 
@@ -142,9 +143,8 @@ elif args.dataset == 'mbspeech':
                     fn = "MB%d%02d-%04d" % (book_nr, chapter, i)
                     metadata_csv_writer.writerow([fn, sentence, sentence])  # same format as LJSpeech
                     wav = samples[start:end]
-                    wav = librosa.resample(wav, sample_rate, hp.sr)  # use same sample rate as LJSpeech
-                    librosa.output.write_wav(os.path.join(wavs_path, fn + ".wav"), wav, hp.sr)
-
+                    wav = librosa.resample(wav, orig_sr=sample_rate, target_sr=hp.sr)  # use same sample rate as LJSpeech
+                    sf.write(os.path.join(wavs_path, fn + ".wav"), wav, hp.sr)
                 chapter += 1
             except FileNotFoundError:
                 break

@@ -23,6 +23,7 @@ if args.dataset == 'ljspeech':
     from datasets.lj_speech import vocab, get_test_data
 
     SENTENCES = [
+        "Hey Mandakh! Now sleep.",
         "The birch canoe slid on the smooth planks.",
         "Glue the sheet to the dark blue background.",
         "It's easy to tell the depth of a well.",
@@ -41,16 +42,18 @@ else:
         "Хашлага даван, зүлэг гэмтээсэн жолоочийн эрхийг хоёр жилээр хасжээ.",
         "Монгол хүн бидний сэтгэлийг сорсон орон. Энэ бол миний төрсөн нутаг. Монголын сайхан орон.",
         "Постройка крейсера затягивалась из-за проектных неувязок, необходимости."
+    
     ]
 
 torch.set_grad_enabled(False)
 
-text2mel = Text2Mel(vocab).eval()
+text2mel = Text2Mel(vocab)
 last_checkpoint_file_name = get_last_checkpoint_file_name(os.path.join(hp.logdir, '%s-text2mel' % args.dataset))
-# last_checkpoint_file_name = 'logdir/%s-text2mel/step-020K.pth' % args.dataset
+last_checkpoint_file_name = 'logdir/%s-text2mel/step-200K.pth' % args.dataset
 if last_checkpoint_file_name:
     print("loading text2mel checkpoint '%s'..." % last_checkpoint_file_name)
-    load_checkpoint(last_checkpoint_file_name, text2mel, None)
+    text2mel.load_state_dict(torch.load(last_checkpoint_file_name).state_dict())
+    text2mel.eval()
 else:
     print("text2mel not exits")
     sys.exit(1)
