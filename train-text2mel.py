@@ -20,13 +20,15 @@ from utils import get_last_checkpoint_file_name, load_checkpoint, save_checkpoin
 from datasets.data_loader import Text2MelDataLoader
 
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--dataset", required=True, choices=['ljspeech', 'mbspeech'], help='dataset name')
+parser.add_argument("--dataset", required=True, choices=['ljspeech', 'mbspeech', 'tsspeech'], help='dataset name')
 args = parser.parse_args()
 
 if args.dataset == 'ljspeech':
     from datasets.lj_speech import vocab, LJSpeech as SpeechDataset
-else:
+elif args.dataset == 'mbspeech':
     from datasets.mb_speech import vocab, MBSpeech as SpeechDataset
+elif args.dataset == 'tsspeech':
+    from datasets.ts_speech import vocab, TSSpeech as SpeechDataset
 
 use_gpu = torch.cuda.is_available()
 print('use_gpu', use_gpu)

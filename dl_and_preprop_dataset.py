@@ -20,10 +20,11 @@ from zipfile import ZipFile
 from audio import preprocess
 from utils import download_file
 from datasets.mb_speech import MBSpeech
+from datasets.ts_speech import TSSpeech
 from datasets.lj_speech import LJSpeech
 
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--dataset", required=True, choices=['ljspeech', 'mbspeech'], help='dataset name')
+parser.add_argument("--dataset", required=True, choices=['ljspeech', 'mbspeech', 'tsspeech'], help='dataset name')
 args = parser.parse_args()
 
 if args.dataset == 'ljspeech':
@@ -49,6 +50,7 @@ if args.dataset == 'ljspeech':
         print("pre processing...")
         lj_speech = LJSpeech([])
         preprocess(dataset_path, lj_speech)
+
 elif args.dataset == 'mbspeech':
     dataset_name = 'MBSpeech-1.0'
     datasets_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'datasets')
@@ -160,3 +162,71 @@ elif args.dataset == 'mbspeech':
     print("pre processing...")
     mb_speech = MBSpeech([])
     preprocess(dataset_path, mb_speech)
+
+elif args.dataset == 'tsspeech':
+    dataset_name = 'TSSpeech'
+    datasets_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'datasets')
+    dataset_path = os.path.join(datasets_path, dataset_name)
+
+    data_names = ['ulger1', 'ulger2', 'ulger3', 'ulger4', 'ulger5', 'ulger6', 'ulger7', 'ulger8',]
+
+
+    
+    total_duration_s = 0
+
+    if not os.path.isdir(dataset_path):
+        os.mkdir(dataset_path)
+    wavs_path = os.path.join(dataset_path, 'wavs')
+    if not os.path.isdir(wavs_path):
+        os.mkdir(wavs_path)
+
+    rows = []
+    
+    metadata_csv = open(os.path.join(dataset_path, f'metadata.csv'), 'w', encoding='utf-8')
+
+    metadata_csv_writer = csv.writer(metadata_csv, delimiter='|')
+    for data_name in data_names:
+        with open(os.path.join(dataset_path, f'output/{data_name}.csv'), 'r', encoding='utf-8') as csv_file:
+            csv_file_reader = csv.reader(csv_file, delimiter='|')
+            for row in csv_file_reader:
+                file_name = row[0]
+                row[0] = data_name + "_" + row[0].split("/")[-1][:-4]
+                rows.append(row)
+                data_path = os.path.join(datasets_path, f"/output/{data_name}")
+                if file_name.endswith(".wav"):
+                    # copy file
+                    src = os.path.join(dataset_path, file_name)
+                    dst = os.path.join(wavs_path, row[0]+".wav")
+                    os.system('cp %s %s' % (src, dst))
+                    # get wav duration
+                    duration = librosa.get_duration(filename=dst)
+                    total_duration_s += duration
+
+    # print total_duration_s as HH:MM:SS
+    total_duration_s = int(total_duration_s)
+    total_duration_s = time.strftime('%H:%M:%S', time.gmtime(total_duration_s))
+
+
+    print(f"Total training wav duration: {total_duration_s}")
+        
+    metadata_csv_writer.writerows(rows)
+    metadata_csv.close()
+
+    def _normalize(s):
+        """remove leading '-'"""
+        s = s.strip()
+        if s[0] == '—' or s[0] == '-':
+            s = s[1:].strip()
+        return s
+
+
+
+
+    
+   
+
+    # pre process
+    print("pre processing...")
+    ts_speech = TSSpeech([])
+    
+    preprocess(dataset_path, ts_speech)

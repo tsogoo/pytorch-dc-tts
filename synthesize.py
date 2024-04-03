@@ -16,7 +16,7 @@ from audio import save_to_wav
 from utils import get_last_checkpoint_file_name, load_checkpoint, save_to_png
 
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--dataset", required=True, choices=['ljspeech', 'mbspeech'], help='dataset name')
+parser.add_argument("--dataset", required=True, choices=['ljspeech', 'mbspeech', 'tsspeech'], help='dataset name')
 args = parser.parse_args()
 
 if args.dataset == 'ljspeech':
@@ -28,7 +28,10 @@ if args.dataset == 'ljspeech':
         "It's easy to tell the depth of a well.",
     ]
 else:
-    from datasets.mb_speech import vocab, get_test_data
+    if args.dataset == 'mbspeech':
+        from datasets.mb_speech import vocab, get_test_data
+    elif args.dataset == 'tsspeech':
+        from datasets.ts_speech import vocab, get_test_data
 
     SENTENCES = [
         "Нийслэлийн прокурорын газраас төрийн өндөр албан тушаалтнуудад холбогдох зарим эрүүгийн хэргүүдийг шүүхэд шилжүүлэв.",
@@ -55,13 +58,12 @@ else:
     print("text2mel not exits")
     sys.exit(1)
 
-ssrn = SSRN()
+ssrn = SSRN(vocab).eval()
 last_checkpoint_file_name = get_last_checkpoint_file_name(os.path.join(hp.logdir, '%s-ssrn' % args.dataset))
-last_checkpoint_file_name = 'logdir/%s-ssrn/step-165K.pth' % args.dataset
+#last_checkpoint_file_name = 'logdir/mbspeech-ssrn-step-165K.pth'
 if last_checkpoint_file_name:
     print("loading ssrn checkpoint '%s'..." % last_checkpoint_file_name)
-    ssrn.load_state_dict(torch.load(last_checkpoint_file_name).state_dict())
-    ssrn.eval()
+    load_checkpoint(last_checkpoint_file_name, ssrn, None)
 else:
     print("ssrn not exits")
     sys.exit(1)
