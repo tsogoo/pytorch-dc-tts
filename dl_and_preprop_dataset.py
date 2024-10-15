@@ -20,7 +20,7 @@ from zipfile import ZipFile
 from audio import preprocess
 from utils import download_file
 from datasets.mb_speech import MBSpeech
-from datasets.ts_speech import TSSpeech
+from datasets.ts_speech import TSSpeech, text_normalize
 from datasets.lj_speech import LJSpeech
 
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -152,8 +152,8 @@ elif args.dataset == 'mbspeech':
                 break
 
 
-    _convert_mp3_to_wav('01_Genesis', 1)
-    _convert_mp3_to_wav('02_Exodus', 2)
+    # _convert_mp3_to_wav('01_Genesis', 1)
+    # _convert_mp3_to_wav('02_Exodus', 2)
     _convert_mp3_to_wav('03_Leviticus', 3)
     metadata_csv.close()
     print("total audio duration: %ss" % (time.strftime('%H:%M:%S', time.gmtime(total_duration_s))))
@@ -164,11 +164,18 @@ elif args.dataset == 'mbspeech':
     preprocess(dataset_path, mb_speech)
 
 elif args.dataset == 'tsspeech':
+    from df.enhance import enhance, init_df, load_audio, save_audio
+    df_model, df_state, _ = init_df()
+
     dataset_name = 'TSSpeech'
     datasets_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'datasets')
     dataset_path = os.path.join(datasets_path, dataset_name)
 
-    data_names = ['ulger1', 'ulger2', 'ulger3', 'ulger4', 'ulger5', 'ulger6', 'ulger7', 'ulger8',]
+    data_names = [
+         'ulger7', 'ulger8', 'ulger1', 'ulger2', 'ulger3', 'ulger4', 'ulger5', 'ulger6',
+         'lit1','lit2', 'lit3','bart1', 'bart2',
+         'geser1','geser2','geser3'
+        ]
 
 
     
@@ -191,16 +198,30 @@ elif args.dataset == 'tsspeech':
             for row in csv_file_reader:
                 file_name = row[0]
                 row[0] = data_name + "_" + row[0].split("/")[-1][:-4]
-                rows.append(row)
-                data_path = os.path.join(datasets_path, f"/output/{data_name}")
-                if file_name.endswith(".wav"):
-                    # copy file
-                    src = os.path.join(dataset_path, file_name)
-                    dst = os.path.join(wavs_path, row[0]+".wav")
-                    os.system('cp %s %s' % (src, dst))
-                    # get wav duration
-                    duration = librosa.get_duration(filename=dst)
-                    total_duration_s += duration
+                row[1] = text_normalize(row[1])
+                if len(row[1]) < 170 and len(row[1].split(" ")) > 2:
+                    row[2] = row[1]
+                    data_path = os.path.join(datasets_path, f"/output/{data_name}")
+                    if file_name.endswith(".wav"):
+                        # copy file
+                        src = os.path.join(dataset_path, file_name)
+                        dst = os.path.join(wavs_path, row[0]+".wav")
+
+                        audio, _ = load_audio(src, sr=df_state.sr())
+                        # Denoise the audio
+                        enhanced = enhance(df_model, df_state, audio)
+                        # Save for listening
+                        save_audio(dst, enhanced, df_state.sr())
+
+                        # get wav duration
+                        duration = librosa.get_duration(path=dst)
+                        if duration < 17 and duration > 0.9:
+                            rows.append(row[:-1])
+                            total_duration_s += duration
+                        else:
+                            # delete destination file
+                            print("deleted...", dst)
+                            os.remove(dst)
 
     # print total_duration_s as HH:MM:SS
     total_duration_s = int(total_duration_s)

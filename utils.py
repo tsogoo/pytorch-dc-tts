@@ -37,7 +37,7 @@ def load_checkpoint(checkpoint_file_name, model, optimizer):
 
 def save_checkpoint(logdir, epoch, global_step, model, optimizer):
     """Saves the training state into the given log dir path."""
-    checkpoint_file_name = os.path.join(logdir, 'step-%03dK.pth' % (global_step // 1000))
+    checkpoint_file_name = os.path.join(logdir, 'step-%06d.pth' % (global_step))
     print("saving the checkpoint file '%s'..." % checkpoint_file_name)
     checkpoint = {
         'epoch': epoch + 1,

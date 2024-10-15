@@ -18,23 +18,28 @@ def find_numbers(string):
     return numbers
 
 def text_normalize(text):
-    text = text.strip().lower().replace("\n","").replace("\r","").replace("–","-").replace("…",".")
+    text = text.strip().lower() #.replace("\n","").replace("\r","").replace("…",".")
+    
     # use number_to_word on text
     # search any numbers in text and replace with number_to_word result
-
+    
     numbers_found = find_numbers(text)
     if numbers_found:
         for number in numbers_found:
             text = text.replace(number, number2word(number))
 
-
+    
     # text = text.replace(",", "'")
     # text = text.replace("!", "?")
-    for c in "-—:":
-        text = text.replace(c, "-")
-    for c in "()\"«»“”'":
-        text = text.replace(c, ",")
-    return text
+    for c in text:
+        if c not in vocab:
+            text = text.replace(c, "")
+    text = text.replace("  ", " ").replace("   "," ")
+    # for c in "-–—:.,!?":
+    #     text = text.replace(c, "")
+    # for c in "()[]\"«»“”'":
+    #     text = text.replace(c, "")
+    return text.strip()
 
 
 def read_metadata(metadata_file):
@@ -44,7 +49,7 @@ def read_metadata(metadata_file):
     with open(transcript, 'r', encoding='utf-8') as csv_file:
         csv_file_reader = csv.reader(csv_file, delimiter='|')
         for row in csv_file_reader:
-            fname, _, text, lol = row
+            fname, _, text = row
             fnames.append(fname)
 
             text = text_normalize(text) + "E"  # E: EOS
